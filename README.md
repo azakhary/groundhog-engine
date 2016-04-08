@@ -206,7 +206,7 @@ phil.s
 [agenda]
 	change_state do_nothing
 [/agenda]
-[state "turn_lights_ooff"]
+[state "turn_lights_off"]
 	[main]
 		condition_start world.light == off
 			change_state do_nothing
