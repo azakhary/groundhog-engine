@@ -22,92 +22,6 @@ Micro Commands
 8) go to marker
 9) change remote item value (set a key/value)
 
-Gloabal Macro State's: (sub methods are character specific re-sable micro command program with name that can be set as current happening)
-1) "do nothing" - take no actions, yet stay alert for conditions
-
-Bob Agenda:
-Bob's macro state was "do nothing".
-Bob's injected triggers for "do nothing" where:
-world.light value change to "on" { add +20 to irritation. if irritation is more then 50 {say "srsly? [burp]"}}
-world.light value change to "off" {substract -10 from irritation. say "Thanks... [burp]"}
-
-
-Jake Agenda:
-
-Jake's macro satate was "do nothing"
-Jake's injected triggers for "do nothing" where:
-state.time_passed change to 5: change macro state to "local.turn lights on"
-world.light value change to "off" - change macro state to "local.turn lights on"
-
-Jake's local macro states list:
-"turn lights on" {
-	if (world.lights is on) {
-		set marcro state "do nothing"
-	}
-	remember "last position":"curr_position"
-	1: walk towards item - Box A.
-	interract with item set "pressed", "true"
-	if(word.light is off) {
-		delay 2 second.
-		add to inner stat "irritation", "10"
-		if(irritation > 50) goto marker 2.
-		go to marker 1.		
-	}
-	2. walk towards coordinate "last_position"
-	set marcro state "do nothing"
-}
-
-
-Phill Agenda:
-
-Phill's macro state was "do nothing"
-Phill's injected triggers for "do nothing" where:
-world.light value change to "on" - change macro state to "local.turn lights off"
-Phill's local macro states list:
-"turn lights off" {
-	if (world.lights is off) {
-		set marcro state "do nothing"
-	}
-	if (state.exhaustion > 0) {
-		set marcro state "do nothing"
-	}
-	remember "last position":"curr_position"
-	1: walk towards item - Box B.
-	add to inner stat "exhaustion", "10"
-	interract with item set "pressed", "true"
-	if(word.light is on) {
-		delay 2 second.
-		add to inner stat "irritation", "10"
-		if(irritation > 50) goto marker 2.
-		go to marker 1.		
-	}
-	2. walk towards coordinate "last_position"
-	set marcro state "do nothing"
-}
-
-Box A logic:
-trigger value changed "pressed":true {
-	BoxB set pressed:false.
-	world.lights on
-}
-
-Box B logic:
-trigger value changed "pressed":true {
-	BoxA set pressed:false.
-	world.lights off
-}
-
-World DataBox:
-params - light
-
-Triggers/Events:
-1) entity key value changed
-
-
-
-
-Now that we are done with pseudo code let's decide on syntax:
-
 
 micro command syntax:
 
@@ -139,7 +53,7 @@ change_state
 marker
 delay
 walk_to_item
-item_interract
+item_interact
 goto
 walk_to_position
 
@@ -147,6 +61,7 @@ walk_to_position
 bob.s
 --------
 [agenda]
+    change_state do_nothing
 [/agenda]
 [state "do_nothing"]
 	[trigger world.light on]
@@ -177,8 +92,8 @@ jake.s
 		operation memory.last_position = (values.curr_position)
 		marker 1
 		walk_to_item entities.boxA
-		item_interract entities.boxA.values.pressed true
-		condition_start world.ight == off
+		item_interact entities.boxA.values.pressed true
+		condition_start world.light == off
 			delay 2000
 			operation stats.irritation += 10
 			condition_start stats.irritation > 50
@@ -218,7 +133,7 @@ phil.s
 		marker 1
 		walk_to_item entities.boxB
 		operation stats.exhaustion += 10
-		item_interract entities.boxB.values.pressed true
+		item_interact entities.boxB.values.pressed true
 		condition_start world.light == on
 			delay 2000
 			operation stats.irritation += 10
@@ -247,7 +162,7 @@ box_a.s
 [state "do_nothing"]
 	[trigger value values.pressed true]
 		operation values.pressed = false
-		operation world.ligts = on
+		operation world.light = on
 	[trigger]
 [/state]
 
@@ -256,7 +171,7 @@ box_b.s
 [state "do_nothing"]
 	[trigger value values.pressed true]
 		operation values.pressed = false
-		operation world.ligts = off
+		operation world.light = off
 	[trigger]
 [/state]
 
@@ -264,5 +179,14 @@ box_b.s
 global_macro_commands.s
 -------------------------
 [state "do_nothing"]
-
+    [main]
+    [/main]
 [/state]
+
+
+Here is how interpreting and comiling works
+
+First Script reader separates data into agendas, states and triggers.
+Then it runs and finds all micro scripts insode triggers agendas or main blocks, and compiles them into
+machine readable data. and also compiles main scripts into linked data.
+

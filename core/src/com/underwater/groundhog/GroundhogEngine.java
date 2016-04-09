@@ -14,6 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.underwater.groundhog.engine.compiler.GSInterpreter;
+import com.underwater.groundhog.engine.compiler.GSReader;
 import com.underwater.groundhog.engine.components.ItemComponent;
 import com.underwater.groundhog.engine.components.PersonComponent;
 import com.underwater.groundhog.engine.components.ThingComponent;
@@ -35,6 +37,10 @@ public class GroundhogEngine extends ApplicationAdapter {
 		engine = new Engine();
 		viewport = new FitViewport(400f, 400f);
 		shapeRenderer = new ShapeRenderer();
+
+		GSReader gsReader = new GSReader(Gdx.files.internal("test.gs"));
+		GSInterpreter interpreter = new GSInterpreter(gsReader);
+		interpreter.execute();
 
 		viewport.getCamera().position.set(0, 0, 0);
 
