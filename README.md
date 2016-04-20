@@ -54,7 +54,6 @@ say
 change_state
 marker
 delay
-walk_to_item
 item_interact
 goto
 walk_to_position

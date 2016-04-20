@@ -8,7 +8,7 @@ import com.underwater.groundhog.engine.components.ThingComponent;
  */
 public class ThingScope extends DataScope {
 
-    private Entity entity;
+    protected Entity entity;
 
     public ThingScope(Entity entity) {
         this.entity = entity;
@@ -23,4 +23,14 @@ public class ThingScope extends DataScope {
             return super.get(scope);
         }
     }
+
+    @Override
+    public boolean contains(String scope) {
+        if(scope.equals("position")) {
+            return true;
+        } else {
+            return super.contains(scope);
+        }
+    }
+
 }

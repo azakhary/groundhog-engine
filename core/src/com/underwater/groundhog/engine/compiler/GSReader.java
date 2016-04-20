@@ -28,7 +28,7 @@ public class GSReader {
     }
 
     public class Trigger {
-        public String condition;
+        public String[] args;
         public String script;
     }
 
@@ -56,7 +56,8 @@ public class GSReader {
             Array<TagData> triggersArr = readTags(stateData.data, "trigger");
             for(TagData triggerData: triggersArr) {
                 Trigger trigger = new Trigger();
-                trigger.condition = triggerData.param;
+                String[] parts = triggerData.param.split(" ");
+                trigger.args = parts;
                 trigger.script = triggerData.data;
                 state.triggers.add(trigger);
             }

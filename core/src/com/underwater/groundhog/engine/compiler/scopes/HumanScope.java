@@ -7,7 +7,27 @@ import com.badlogic.ashley.core.Entity;
  */
 public class HumanScope extends ThingScope {
 
+    public DataScope stats = new DataScope();
+
     public HumanScope(Entity entity) {
         super(entity);
+    }
+
+    @Override
+    public DataScope get(String scope) {
+        if(scope.equals("stats")) {
+            return stats;
+        } else {
+            return super.get(scope);
+        }
+    }
+
+    @Override
+    public boolean contains(String scope) {
+        if(scope.equals("stats")) {
+            return true;
+        } else {
+            return super.contains(scope);
+        }
     }
 }

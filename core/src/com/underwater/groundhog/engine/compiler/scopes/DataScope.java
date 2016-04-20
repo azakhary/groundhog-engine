@@ -20,7 +20,14 @@ public class DataScope {
     }
 
     public DataScope get(String scope) {
+        if(!items.containsKey(scope)) {
+            addScope(scope);
+        }
         return items.get(scope);
+    }
+
+    public boolean contains(String scope) {
+        return items.containsKey(scope);
     }
 
     public void addScope(String name) {
@@ -33,6 +40,10 @@ public class DataScope {
 
     public String value() {
         return value;
+    }
+
+    public void setValue(String string) {
+        value = string;
     }
 
     public static DataScope valueObj(String str) {

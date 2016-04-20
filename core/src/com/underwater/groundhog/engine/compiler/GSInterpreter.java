@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity;
 import com.underwater.groundhog.engine.compiler.micro.MicroCommand;
 import com.underwater.groundhog.engine.compiler.micro.commands.*;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
+import com.underwater.groundhog.engine.components.ThingComponent;
 import com.underwater.groundhog.engine.systems.GameSystem;
 
 import java.util.ArrayList;
@@ -17,12 +18,14 @@ public class GSInterpreter {
 
     private GSReader reader;
 
-    private ArrayList<CommandLine> currCommands = new ArrayList<CommandLine>();
+    public ArrayList<CommandLine> currCommands = new ArrayList<CommandLine>();
 
     private HashMap<String, MicroCommand> microMap = new HashMap<String, MicroCommand>();
 
+    private HashMap<String, Integer> markerMap = new HashMap<String, Integer>();
+
     private MicroCommand currCommand = null;
-    private int currCommandIndex = -1;
+    public int currCommandIndex = -1;
     private boolean isScriptRunning = false;
     public Engine engine;
     public Entity entity;
@@ -53,7 +56,9 @@ public class GSInterpreter {
         microMap.put("say", new SayCommand());
         microMap.put("change_state", new ChangeStateCommand());
         microMap.put("walk_to_position", new WalkToPosCommand());
-        microMap.put("walk_to_item", new WalkToItemCommand());
+        microMap.put("operation", new OperationCommand());
+        microMap.put("condition_start", new ConditionStartCommand());
+        microMap.put("condition_end", new DummyCommand());
     }
 
     public void execute() {
@@ -83,6 +88,7 @@ public class GSInterpreter {
 
 
     public void executeScript(String script) {
+        markerMap.clear();
         initNewScript(script);
         executeCommand(0);
     }
@@ -158,9 +164,18 @@ public class GSInterpreter {
         executeScript(state.mainScript);
     }
 
-    public String processExpression(String expression) {
+    public DataScope processExpression(String expression) {
         String[] parts = expression.split("\\.");
-        DataScope scope = new DataScope();
+        DataScope scope = entity.getComponent(ThingComponent.class).scope;
+        if(!expression.contains(".")) {
+            if(scope.contains(expression)) {
+                return scope.get(expression);
+            } else if(engine.getSystem(GameSystem.class).worldScope.contains(expression)){
+                return engine.getSystem(GameSystem.class).worldScope.get(expression);
+            } else {
+                return new DataScope(expression);
+            }
+        }
         int index = 0;
         if(parts[0].equals("world")) {
             scope = engine.getSystem(GameSystem.class).worldScope;
@@ -170,7 +185,14 @@ public class GSInterpreter {
             scope = scope.get(parts[index]);
         }
 
-        return scope.value();
+        return scope;
     }
 
+    public void setMarker(String marker) {
+        markerMap.put(marker, currCommandIndex);
+    }
+
+    public void goTo(String marker) {
+        currCommandIndex = markerMap.get(marker);
+    }
 }
