@@ -6,19 +6,18 @@ import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.underwater.groundhog.engine.compiler.GSInterpreter;
-import com.underwater.groundhog.engine.compiler.GSReader;
+import com.underwater.groundhog.engine.compiler.scopes.DataScope;
+import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
+import com.underwater.groundhog.engine.compiler.scopes.ThingScope;
 import com.underwater.groundhog.engine.components.ItemComponent;
 import com.underwater.groundhog.engine.components.PersonComponent;
 import com.underwater.groundhog.engine.components.ThingComponent;
+import com.underwater.groundhog.engine.systems.GameSystem;
 import com.underwater.groundhog.engine.systems.PersonSystem;
 
 public class GroundhogEngine extends ApplicationAdapter {
@@ -31,6 +30,8 @@ public class GroundhogEngine extends ApplicationAdapter {
 	private Vector2[] humans;
 	private Vector2[] items;
 
+	private GameSystem gameSystem;
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
@@ -38,51 +39,40 @@ public class GroundhogEngine extends ApplicationAdapter {
 		viewport = new FitViewport(400f, 400f);
 		shapeRenderer = new ShapeRenderer();
 
-		GSReader gsReader = new GSReader(Gdx.files.internal("test.gs"));
-		GSInterpreter interpreter = new GSInterpreter(gsReader);
-		interpreter.execute();
-
 		viewport.getCamera().position.set(0, 0, 0);
 
 		PersonSystem personSystem = new PersonSystem();
+		gameSystem = new GameSystem();
 		engine.addSystem(personSystem);
+		engine.addSystem(gameSystem);
 
-		humans = new Vector2[3];
-		items = new Vector2[2];
+		gameSystem.worldScope.addScope("items");
+		gameSystem.worldScope.addScope("people");
 
+		createHuman("test", new Vector2(0, 0));
+		createItem("lamp", new Vector2(100, 100));
 
-		humans[0] = new Vector2(-100, 120);
-		humans[1] = new Vector2(0, 120);
-		humans[2] = new Vector2(100, 120);
-
-
-		items[0] = new Vector2(-80, -80);
-		items[1] = new Vector2(80, -80);
-
-
-		for(Vector2 pos: humans) {
-			createHuman(pos);
-		}
-		for(Vector2 pos: items) {
-			createItem(pos);
-		}
 	}
 
-	private void createHuman(Vector2 pos) {
+	private void createHuman(String id, Vector2 pos) {
 		Entity entity = new Entity();
-		PersonComponent person = new PersonComponent();
+		PersonComponent person = new PersonComponent(entity, engine, Gdx.files.internal(id+".gs"));
 		person.setName("Gogi");
 		ThingComponent thing = new ThingComponent();
+		thing.scope = new HumanScope(entity);
+		gameSystem.worldScope.get("people").addScope(id, thing.scope);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
 		entity.add(person);
 		engine.addEntity(entity);
 	}
 
-	private void createItem(Vector2 pos) {
+	private void createItem(String id, Vector2 pos) {
 		Entity entity = new Entity();
 		ItemComponent item = new ItemComponent();
 		ThingComponent thing = new ThingComponent();
+		thing.scope = new ThingScope(entity);
+		gameSystem.worldScope.get("items").addScope(id, thing.scope);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
 		entity.add(item);

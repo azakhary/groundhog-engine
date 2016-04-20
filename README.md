@@ -13,7 +13,7 @@ Story Ended.
 
 Micro Commands
 1) walk towards item.
-2) interract with item (set a key/value)
+2) interact with item (set a key/value)
 3) say something out load
 4) walk towards coordinate.
 5) remember key/value
@@ -27,21 +27,23 @@ micro command syntax:
 
 SCOPES:
 -------------------
-entity{
-	values - set from engine, and also can be set from outside
-	world - everyone can see world and it's properties
+world {
+    entities {
+        boxA
+        boxB
+        jake
+        bob
+        entity{
+            values - set from engine, and also can be set from outside
+            world - everyone can see world and it's properties
+        }
+        human extends entity {
+            stats - stats like exhaustion irritation e.g.
+            memory - like values but can only be set by human itself (as private field)
+            world.
+        }
+    }
 }
-human extends entity {
-	stats - stats like exhaustion irritation e.g.
-	memory - like values but can only be set by human itself (as private field)
-}
-entities {
-	boxA
-	boxB
-	jake
-	bob
-}
-
 
 MICRO_COMMANDS:
 ----------------------
