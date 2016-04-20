@@ -38,7 +38,12 @@ public class ConditionStartCommand extends MicroCommand {
     private boolean compare(String left, String right, String comparator) {
         if(comparator.equals("==")) {
             return left.equals(right);
+        } else if(comparator.equals("!=")) {
+            return !left.equals(right);
         } else {
+            if(left.isEmpty()) left = "0";
+            if(right.isEmpty()) right = "0";
+
             float leftVal = Float.parseFloat(left);
             float rightVal = Float.parseFloat(right);
             if (comparator.equals("<=")) {

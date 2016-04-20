@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.underwater.groundhog.engine.TriggerManager;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
 import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
 import com.underwater.groundhog.engine.compiler.scopes.ThingScope;
@@ -49,17 +50,21 @@ public class GroundhogEngine extends ApplicationAdapter {
 		gameSystem.worldScope.addScope("items");
 		gameSystem.worldScope.addScope("people");
 
-		createHuman("test", new Vector2(0, 0));
-		createItem("lamp", new Vector2(100, 100));
+		createHuman("bob", new Vector2(-100, 100));
+		createHuman("jake", new Vector2(0, 100));
+		createHuman("phill", new Vector2(100, 100));
+
+		createItem("boxA", new Vector2(-50, -100));
+		createItem("boxB", new Vector2(50, -100));
 
 	}
 
 	private void createHuman(String id, Vector2 pos) {
 		Entity entity = new Entity();
 		PersonComponent person = new PersonComponent(entity, engine, Gdx.files.internal(id+".gs"));
-		person.setName("Gogi");
-		ThingComponent thing = new ThingComponent();
-		thing.scope = new HumanScope(entity);
+		person.id = id;
+		ThingComponent thing = new ThingComponent(id);
+		thing.scope = new HumanScope(id, entity);
 		gameSystem.worldScope.get("people").addScope(id, thing.scope);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
@@ -70,8 +75,8 @@ public class GroundhogEngine extends ApplicationAdapter {
 	private void createItem(String id, Vector2 pos) {
 		Entity entity = new Entity();
 		ItemComponent item = new ItemComponent();
-		ThingComponent thing = new ThingComponent();
-		thing.scope = new ThingScope(entity);
+		ThingComponent thing = new ThingComponent(id);
+		thing.scope = new ThingScope(id, entity);
 		gameSystem.worldScope.get("items").addScope(id, thing.scope);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
@@ -84,6 +89,7 @@ public class GroundhogEngine extends ApplicationAdapter {
 		viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		engine.update(Gdx.graphics.getDeltaTime());
+		TriggerManager.get().resetEvents();
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);

@@ -14,7 +14,11 @@ public class ThingComponent implements Component {
     private float width;
     private float height;
 
-    public DataScope scope = new DataScope();
+    public DataScope scope;
+
+    public ThingComponent(String id) {
+        scope = new DataScope(id);
+    }
 
     public void setSize(float width, float height) {
         this.width = width;

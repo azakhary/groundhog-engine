@@ -12,7 +12,7 @@ import com.underwater.groundhog.engine.compiler.GSReader;
  */
 public class PersonComponent implements Component {
 
-    private String name;
+    public String id;
 
     /**
      * BRAIN
@@ -29,14 +29,6 @@ public class PersonComponent implements Component {
         gsInterpreter.setEngine(engine);
         gsInterpreter.setEntity(entity);
         gsInterpreter.execute();
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void tick(float deltaTime) {

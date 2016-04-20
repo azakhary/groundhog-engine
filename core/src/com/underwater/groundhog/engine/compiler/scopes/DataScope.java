@@ -1,5 +1,7 @@
 package com.underwater.groundhog.engine.compiler.scopes;
 
+import com.underwater.groundhog.engine.TriggerManager;
+
 import java.util.HashMap;
 
 /**
@@ -9,14 +11,19 @@ public class DataScope {
 
     private HashMap<String, DataScope> items = new HashMap<String, DataScope>();
 
-    private String value = null;
+    private String value = "";
 
-    public DataScope() {
+    public String name = "";
 
+    public String parent = "";
+
+    public DataScope(String name) {
+        this.name = name;
     }
 
-    public DataScope(String value) {
+    public DataScope(String name, String value) {
         this.value = value;
+        this.name = name;
     }
 
     public DataScope get(String scope) {
@@ -31,10 +38,12 @@ public class DataScope {
     }
 
     public void addScope(String name) {
-        items.put(name, new DataScope());
+        DataScope newScope = new DataScope(name);
+        addScope(name, newScope);
     }
 
     public void addScope(String name, DataScope scope) {
+        scope.parent = parent+this.name+".";
         items.put(name, scope);
     }
 
@@ -43,11 +52,13 @@ public class DataScope {
     }
 
     public void setValue(String string) {
+        String packageName = parent + name;
+        TriggerManager.get().registerEvent("value", packageName);
         value = string;
     }
 
     public static DataScope valueObj(String str) {
-        DataScope scope = new DataScope(str);
+        DataScope scope = new DataScope("", str);
         return scope;
     }
 }

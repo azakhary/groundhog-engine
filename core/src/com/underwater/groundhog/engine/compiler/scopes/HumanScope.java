@@ -7,10 +7,10 @@ import com.badlogic.ashley.core.Entity;
  */
 public class HumanScope extends ThingScope {
 
-    public DataScope stats = new DataScope();
+    public DataScope stats = new DataScope("stats");
 
-    public HumanScope(Entity entity) {
-        super(entity);
+    public HumanScope(String name, Entity entity) {
+        super(name, entity);
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.underwater.groundhog.engine.compiler;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.underwater.groundhog.engine.TriggerManager;
 import com.underwater.groundhog.engine.compiler.micro.MicroCommand;
 import com.underwater.groundhog.engine.compiler.micro.commands.*;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
+import com.underwater.groundhog.engine.components.PersonComponent;
 import com.underwater.groundhog.engine.components.ThingComponent;
 import com.underwater.groundhog.engine.systems.GameSystem;
 
@@ -29,6 +31,10 @@ public class GSInterpreter {
     private boolean isScriptRunning = false;
     public Engine engine;
     public Entity entity;
+
+    public GSReader.State currentState;
+    private float stateTimer = 0;
+    private float stateTimePassed = 0;
 
     public void setEngine(Engine engine) {
         this.engine = engine;
@@ -59,6 +65,8 @@ public class GSInterpreter {
         microMap.put("operation", new OperationCommand());
         microMap.put("condition_start", new ConditionStartCommand());
         microMap.put("condition_end", new DummyCommand());
+        microMap.put("marker", new MarkerCommand());
+        microMap.put("goto", new GotoCommand());
     }
 
     public void execute() {
@@ -66,6 +74,23 @@ public class GSInterpreter {
     }
 
     public void tick(float delta) {
+        // check for triggers
+        if(currentState != null) {
+            stateTimer+=delta;
+            if(stateTimer > 1f) {
+                stateTimer = 0;
+                stateTimePassed+=1f;
+                stateTick(currentState);
+            }
+            for(GSReader.Trigger trigger: currentState.triggers) {
+                if(TriggerManager.get().checkForEvent(trigger.args[0], trigger.args[1])) {
+                    executeScript(trigger.script);
+                    break;
+                }
+            }
+        }
+
+
         if(isScriptRunning) {
             currCommand.tick(delta);
         }
@@ -159,12 +184,18 @@ public class GSInterpreter {
     }
 
     public void changeState(String stateName) {
-        GSReader.State state = reader.states.get(stateName);
+        stateTimer = 0;
+        stateTimePassed = 0;
+        currentState = reader.states.get(stateName);
 
-        executeScript(state.mainScript);
+        executeScript(currentState.mainScript);
     }
 
     public DataScope processExpression(String expression) {
+        if(expression.equals("state_time")) {
+            return new DataScope("", stateTimePassed+"");
+        }
+
         String[] parts = expression.split("\\.");
         DataScope scope = entity.getComponent(ThingComponent.class).scope;
         if(!expression.contains(".")) {
@@ -173,7 +204,7 @@ public class GSInterpreter {
             } else if(engine.getSystem(GameSystem.class).worldScope.contains(expression)){
                 return engine.getSystem(GameSystem.class).worldScope.get(expression);
             } else {
-                return new DataScope(expression);
+                return new DataScope("", expression);
             }
         }
         int index = 0;
@@ -186,6 +217,12 @@ public class GSInterpreter {
         }
 
         return scope;
+    }
+
+    public void stateTick(GSReader.State state) {
+        PersonComponent person = entity.getComponent(PersonComponent.class);
+        String fullName = person.id + "."+ state.name;
+        TriggerManager.get().registerEvent("state_tick", fullName);
     }
 
     public void setMarker(String marker) {

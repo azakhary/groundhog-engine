@@ -149,7 +149,7 @@ phil.s
 	[/main]
 [/state]
 [state "do_nothing"]
-	[trigger value state.time_passed == 5]
+	[trigger value state.time_passed == 3]
 		change_state turn_lights_on
 	[trigger]
 	[trigger value world.light == off]

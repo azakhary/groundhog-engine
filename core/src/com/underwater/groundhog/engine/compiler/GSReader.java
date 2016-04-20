@@ -41,6 +41,7 @@ public class GSReader {
     public void read() {
         String data = file.readString();
         data = data.replaceAll("\t", "");
+        data = data.replaceAll("    ", "");
 
         agenda = readTag(data, "agenda");
         Array<TagData> stateTags = readTags(data, "state");

@@ -3,6 +3,7 @@
 [/agenda]
 [state "talk_test"]
 	[main]
+	    marker aaa
 		delay 1
 		say "...[burp]"
 		delay 1
@@ -11,5 +12,6 @@
 		say "Yippie Ki Yay MotherFucker"
 		delay 1
 		walk_to_position memory.last_position
+		goto aaa
 	[/main]
 [/state]

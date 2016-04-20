@@ -8,7 +8,7 @@ import com.underwater.groundhog.engine.compiler.scopes.DataScope;
  */
 public class GameSystem extends EntitySystem {
 
-    public DataScope worldScope = new DataScope();
+    public DataScope worldScope = new DataScope("world");
 
     public GameSystem() {
 

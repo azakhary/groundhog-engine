@@ -10,7 +10,8 @@ public class ThingScope extends DataScope {
 
     protected Entity entity;
 
-    public ThingScope(Entity entity) {
+    public ThingScope(String name, Entity entity) {
+        super(name);
         this.entity = entity;
     }
 

@@ -19,26 +19,26 @@ public class OperationCommand extends MicroCommand {
 
         if(operation.equals("=")) {
             leftScope.setValue(rightScope.value());
-        }
-        if(operation.equals("+=")) {
-            float leftVal = Float.parseFloat(leftScope.value());
-            float rightVal = Float.parseFloat(rightScope.value());
-            leftScope.setValue("" + (leftVal+rightVal));
-        }
-        if(operation.equals("-=")) {
-            float leftVal = Float.parseFloat(leftScope.value());
-            float rightVal = Float.parseFloat(rightScope.value());
-            leftScope.setValue("" + (leftVal-rightVal));
-        }
-        if(operation.equals("*=")) {
-            float leftVal = Float.parseFloat(leftScope.value());
-            float rightVal = Float.parseFloat(rightScope.value());
-            leftScope.setValue("" + (leftVal*rightVal));
-        }
-        if(operation.equals("/=")) {
-            float leftVal = Float.parseFloat(leftScope.value());
-            float rightVal = Float.parseFloat(rightScope.value());
-            leftScope.setValue("" + (leftVal/rightVal));
+        } else {
+            String leftStr = leftScope.value();
+            String rightStr = rightScope.value();
+            if(leftStr.isEmpty()) leftStr = "0";
+            if(rightStr.isEmpty()) rightStr = "0";
+            float leftVal = Float.parseFloat(leftStr);
+            float rightVal = Float.parseFloat(rightStr);
+
+            if (operation.equals("+=")) {
+                leftScope.setValue("" + (leftVal + rightVal));
+            }
+            if (operation.equals("-=")) {
+                leftScope.setValue("" + (leftVal - rightVal));
+            }
+            if (operation.equals("*=")) {
+                leftScope.setValue("" + (leftVal * rightVal));
+            }
+            if (operation.equals("/=")) {
+                leftScope.setValue("" + (leftVal / rightVal));
+            }
         }
 
         endCommand();

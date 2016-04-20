@@ -30,7 +30,7 @@ public class WalkToPosCommand extends MicroCommand {
         super.tick(delta);
 
         ThingComponent thingComponent = thingComponentMapper.get(interpreter.entity);
-        boolean reached = moveTowardsTarget(thingComponent, target, 100f, delta);
+        boolean reached = moveTowardsTarget(thingComponent, target, 40f, delta);
 
         if(reached) {
             endCommand();
