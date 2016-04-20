@@ -62,6 +62,7 @@ public class GSInterpreter {
         microMap.put("say", new SayCommand());
         microMap.put("change_state", new ChangeStateCommand());
         microMap.put("walk_to_position", new WalkToPosCommand());
+        microMap.put("walk_to_object", new WalkToObjectCommand());
         microMap.put("operation", new OperationCommand());
         microMap.put("condition_start", new ConditionStartCommand());
         microMap.put("condition_end", new DummyCommand());

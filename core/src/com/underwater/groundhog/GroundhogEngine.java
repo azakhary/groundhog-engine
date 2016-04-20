@@ -66,6 +66,7 @@ public class GroundhogEngine extends ApplicationAdapter {
 		ThingComponent thing = new ThingComponent(id);
 		thing.scope = new HumanScope(id, entity);
 		gameSystem.worldScope.get("people").addScope(id, thing.scope);
+		gameSystem.addObject(id, entity);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
 		entity.add(person);
@@ -78,6 +79,7 @@ public class GroundhogEngine extends ApplicationAdapter {
 		ThingComponent thing = new ThingComponent(id);
 		thing.scope = new ThingScope(id, entity);
 		gameSystem.worldScope.get("items").addScope(id, thing.scope);
+		gameSystem.addObject(id, entity);
 		thing.setPosition(pos.x, pos.y);
 		entity.add(thing);
 		entity.add(item);
