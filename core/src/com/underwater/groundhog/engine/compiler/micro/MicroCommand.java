@@ -7,6 +7,8 @@ import com.underwater.groundhog.engine.compiler.GSInterpreter;
  */
 public abstract class MicroCommand {
 
+    protected boolean interruptable = true;
+
     protected GSInterpreter interpreter;
 
     protected float time = 0;
@@ -29,5 +31,8 @@ public abstract class MicroCommand {
         interpreter.endCommand();
     }
 
+    public boolean isInterruptable() {
+        return interruptable;
+    }
 
 }

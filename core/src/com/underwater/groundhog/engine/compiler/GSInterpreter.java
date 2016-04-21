@@ -72,6 +72,7 @@ public class GSInterpreter {
         microMap.put("init_person", new InitPersonCommand());
         microMap.put("init_item", new InitItemCommand());
         microMap.put("item_interact", new ItemInteractCommand());
+        microMap.put("fire_event", new FireEventCommand());
     }
 
     public void execute() {
@@ -87,10 +88,12 @@ public class GSInterpreter {
                 stateTimePassed+=1f;
                 stateTick(currentState);
             }
-            for(GSReader.Trigger trigger: currentState.triggers) {
-                if(TriggerManager.get().checkForEvent(trigger.args[0], trigger.args[1])) {
-                    executeScript(trigger.script);
-                    break;
+            if(currCommand == null || currCommand.isInterruptable()) {
+                for(GSReader.Trigger trigger: currentState.triggers) {
+                    if(TriggerManager.get().checkForEvent(trigger.args[0], trigger.args[1])) {
+                        executeScript(trigger.script);
+                        break;
+                    }
                 }
             }
         }
@@ -208,10 +211,17 @@ public class GSInterpreter {
 
         String[] parts = expression.split("\\.");
         ThingComponent thing = entity.getComponent(ThingComponent.class);
-        DataScope scope = thing.scope;
-        DataScope worldScope = thing.parentWorld.getComponent(WorldComponent.class).worldScope;
+        DataScope scope = null;
+        DataScope worldScope;
+        if(thing != null) {
+            scope = thing.scope;
+            worldScope = thing.parentWorld.getComponent(WorldComponent.class).worldScope;
+        } else {
+            worldScope = entity.getComponent(WorldComponent.class).worldScope;
+        }
+
         if(!expression.contains(".")) {
-            if(scope.contains(expression)) {
+            if(scope != null && scope.contains(expression)) {
                 return scope.get(expression);
             } else if(worldScope.contains(expression)){
                 return worldScope.get(expression);

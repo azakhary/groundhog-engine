@@ -8,9 +8,20 @@ import com.underwater.groundhog.engine.compiler.micro.MicroCommand;
  */
 public class ItemInteractCommand extends MicroCommand {
 
+    private float delay;
+
     @Override
     public void init(String[] args) {
+        super.init();
+        interruptable = false;
+        delay = 0.2f;
         TriggerManager.get().registerEvent("interaction", args[0]+"."+args[1]);
-        endCommand();
+    }
+
+    public void tick(float delta) {
+        super.tick(delta);
+        if(time > delay) {
+            endCommand();
+        }
     }
 }

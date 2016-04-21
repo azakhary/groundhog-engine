@@ -3,7 +3,8 @@
 [/agenda]
 [state "do_nothing"]
 	[trigger interaction boxA.button_press]
-	    say "LIGHTS ON"
-	    operation world.light = on
+	    condition_start world.electricity == true
+	        operation world.light = on
+	    condition_end
 	[/trigger]
 [/state]

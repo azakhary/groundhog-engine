@@ -16,4 +16,9 @@
             say "Thanks... [burp]"
         condition_end
 	[/trigger]
+	[trigger event bob_gay_love]
+        delay 1
+        say "Oi! You faggot!"
+        fire_event break_phill_heart
+	[/trigger]
 [/state]

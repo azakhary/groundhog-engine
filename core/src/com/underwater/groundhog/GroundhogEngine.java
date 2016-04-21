@@ -8,10 +8,12 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.underwater.groundhog.engine.TriggerManager;
@@ -20,6 +22,7 @@ import com.underwater.groundhog.engine.compiler.GSReader;
 import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
 import com.underwater.groundhog.engine.compiler.scopes.ThingScope;
 import com.underwater.groundhog.engine.components.*;
+import com.underwater.groundhog.engine.systems.LabelSystem;
 import com.underwater.groundhog.engine.systems.WorldSystem;
 import com.underwater.groundhog.engine.systems.BrainSystem;
 
@@ -34,6 +37,7 @@ public class GroundhogEngine extends ApplicationAdapter {
 	private WorldSystem gameSystem;
 	private WorldComponent world;
 	private Entity worldEntity;
+
 
 	private Family thingFamily = Family.all(ThingComponent.class).get();
 
@@ -50,6 +54,7 @@ public class GroundhogEngine extends ApplicationAdapter {
 		gameSystem = new WorldSystem();
 		engine.addSystem(personSystem);
 		engine.addSystem(gameSystem);
+		engine.addSystem(new LabelSystem(batch, viewport));
 
 		createWorld();
 		world.worldScope.addScope("items");
@@ -78,6 +83,9 @@ public class GroundhogEngine extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.begin();
+
+		engine.getSystem(LabelSystem.class).draw();
+
 		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
@@ -104,7 +112,9 @@ public class GroundhogEngine extends ApplicationAdapter {
 			}
 		}
 		shapeRenderer.end();
+
 		batch.end();
+
 
 		TriggerManager.get().resetEvents();
 	}

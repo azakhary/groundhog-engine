@@ -50,4 +50,8 @@ public class TriggerManager {
         return false;
     }
 
+    public void clearAll() {
+        events.clear();
+        pendingEvents.clear();
+    }
 }

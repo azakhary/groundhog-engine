@@ -8,6 +8,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
+import com.underwater.groundhog.engine.TriggerManager;
 import com.underwater.groundhog.engine.compiler.GSInterpreter;
 import com.underwater.groundhog.engine.compiler.GSReader;
 import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
@@ -35,6 +36,7 @@ public class WorldSystem extends IteratingSystem {
         if(!world.worldStarted) {
             world.worldStarted = true;
             worldBrain.gsInterpreter.execute();
+            TriggerManager.get().clearAll();
         }
     }
 
