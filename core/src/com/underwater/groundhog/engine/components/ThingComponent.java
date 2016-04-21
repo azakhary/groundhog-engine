@@ -1,6 +1,7 @@
 package com.underwater.groundhog.engine.components;
 
 import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Entity;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
 
 /**
@@ -16,8 +17,11 @@ public class ThingComponent implements Component {
 
     public DataScope scope;
 
-    public ThingComponent(String id) {
+    public Entity parentWorld;
+
+    public ThingComponent(String id, Entity world) {
         scope = new DataScope(id);
+        parentWorld = world;
     }
 
     public void setSize(float width, float height) {

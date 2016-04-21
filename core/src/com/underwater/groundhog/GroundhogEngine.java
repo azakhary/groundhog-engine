@@ -2,24 +2,26 @@ package com.underwater.groundhog;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.underwater.groundhog.engine.TriggerManager;
-import com.underwater.groundhog.engine.compiler.scopes.DataScope;
+import com.underwater.groundhog.engine.compiler.GSInterpreter;
+import com.underwater.groundhog.engine.compiler.GSReader;
 import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
 import com.underwater.groundhog.engine.compiler.scopes.ThingScope;
-import com.underwater.groundhog.engine.components.ItemComponent;
-import com.underwater.groundhog.engine.components.PersonComponent;
-import com.underwater.groundhog.engine.components.ThingComponent;
-import com.underwater.groundhog.engine.systems.GameSystem;
-import com.underwater.groundhog.engine.systems.PersonSystem;
+import com.underwater.groundhog.engine.components.*;
+import com.underwater.groundhog.engine.systems.WorldSystem;
+import com.underwater.groundhog.engine.systems.BrainSystem;
 
 public class GroundhogEngine extends ApplicationAdapter {
 
@@ -28,10 +30,12 @@ public class GroundhogEngine extends ApplicationAdapter {
 	private Engine engine;
 	private ShapeRenderer shapeRenderer;
 
-	private Vector2[] humans;
-	private Vector2[] items;
 
-	private GameSystem gameSystem;
+	private WorldSystem gameSystem;
+	private WorldComponent world;
+	private Entity worldEntity;
+
+	private Family thingFamily = Family.all(ThingComponent.class).get();
 
 	@Override
 	public void create () {
@@ -42,48 +46,22 @@ public class GroundhogEngine extends ApplicationAdapter {
 
 		viewport.getCamera().position.set(0, 0, 0);
 
-		PersonSystem personSystem = new PersonSystem();
-		gameSystem = new GameSystem();
+		BrainSystem personSystem = new BrainSystem();
+		gameSystem = new WorldSystem();
 		engine.addSystem(personSystem);
 		engine.addSystem(gameSystem);
 
-		gameSystem.worldScope.addScope("items");
-		gameSystem.worldScope.addScope("people");
-
-		createHuman("bob", new Vector2(-100, 100));
-		createHuman("jake", new Vector2(0, 100));
-		createHuman("phill", new Vector2(100, 100));
-
-		createItem("boxA", new Vector2(-50, -100));
-		createItem("boxB", new Vector2(50, -100));
-
+		createWorld();
+		world.worldScope.addScope("items");
+		world.worldScope.addScope("people");
 	}
 
-	private void createHuman(String id, Vector2 pos) {
-		Entity entity = new Entity();
-		PersonComponent person = new PersonComponent(entity, engine, Gdx.files.internal(id+".gs"));
-		person.id = id;
-		ThingComponent thing = new ThingComponent(id);
-		thing.scope = new HumanScope(id, entity);
-		gameSystem.worldScope.get("people").addScope(id, thing.scope);
-		gameSystem.addObject(id, entity);
-		thing.setPosition(pos.x, pos.y);
-		entity.add(thing);
-		entity.add(person);
-		engine.addEntity(entity);
-	}
-
-	private void createItem(String id, Vector2 pos) {
-		Entity entity = new Entity();
-		ItemComponent item = new ItemComponent();
-		ThingComponent thing = new ThingComponent(id);
-		thing.scope = new ThingScope(id, entity);
-		gameSystem.worldScope.get("items").addScope(id, thing.scope);
-		gameSystem.addObject(id, entity);
-		thing.setPosition(pos.x, pos.y);
-		entity.add(thing);
-		entity.add(item);
-		engine.addEntity(entity);
+	private void createWorld() {
+		worldEntity = new Entity();
+		world = new WorldComponent();
+		worldEntity.add(world);
+		engine.addEntity(worldEntity);
+		WorldSystem.setInterpreter(engine, worldEntity, "world");
 	}
 
 	@Override
@@ -91,28 +69,43 @@ public class GroundhogEngine extends ApplicationAdapter {
 		viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		engine.update(Gdx.graphics.getDeltaTime());
-		TriggerManager.get().resetEvents();
 
-		Gdx.gl.glClearColor(0, 0, 0, 1);
+		if(world.worldScope.get("light").value().equals("on")) {
+			Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
+		} else {
+			Gdx.gl.glClearColor(0, 0, 0, 1);
+		}
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		batch.begin();
 		shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-		ImmutableArray<Entity> entities = engine.getEntities();
+		ImmutableArray<Entity> entities = engine.getEntitiesFor(thingFamily);
+
 		for(Entity entity : entities) {
 			ThingComponent thing = entity.getComponent(ThingComponent.class);
+			BrainComponent brain = entity.getComponent(BrainComponent.class);
 			PersonComponent person = entity.getComponent(PersonComponent.class);
 			ItemComponent item = entity.getComponent(ItemComponent.class);
 			shapeRenderer.setColor(0, 1, 0, 1);
 			if(person != null) {
 				shapeRenderer.circle(thing.getX(), thing.getY(), 10f);
 			} else if(item != null) {
-				shapeRenderer.rect(thing.getX()-10f, thing.getY()-10f, 20f, 20f);
+				Rectangle rect = new Rectangle(thing.getX()-10f, thing.getY()-10f, 20f, 20f);
+				if(Gdx.input.justTouched()) {
+					Vector2 point = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+					viewport.unproject(point);
+					if(rect.contains(point)) {
+						TriggerManager.get().registerEvent("interaction", brain.id +"."+"button_press");
+					}
+				}
+				shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
 			}
 		}
 		shapeRenderer.end();
 		batch.end();
+
+		TriggerManager.get().resetEvents();
 	}
 }

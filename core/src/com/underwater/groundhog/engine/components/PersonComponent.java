@@ -11,27 +11,5 @@ import com.underwater.groundhog.engine.compiler.GSReader;
  * Created by azakhary on 4/8/2016.
  */
 public class PersonComponent implements Component {
-
-    public String id;
-
-    /**
-     * BRAIN
-     */
-    private GSInterpreter gsInterpreter;
-
-    /**
-     * END BRAIN
-     */
-
-    public PersonComponent(Entity entity, Engine engine, FileHandle script) {
-        GSReader gsReader = new GSReader(script);
-        gsInterpreter = new GSInterpreter(gsReader);
-        gsInterpreter.setEngine(engine);
-        gsInterpreter.setEntity(entity);
-        gsInterpreter.execute();
-    }
-
-    public void tick(float deltaTime) {
-        gsInterpreter.tick(deltaTime);
-    }
+    public String name;
 }

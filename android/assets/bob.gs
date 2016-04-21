@@ -2,11 +2,6 @@
     change_state do_nothing
 [/agenda]
 [state "do_nothing"]
-    [main]
-        marker start
-        delay 10
-        goto start
-    [/main]
 	[trigger value world.light]
 	    condition_start world.light == on
 	        delay 1

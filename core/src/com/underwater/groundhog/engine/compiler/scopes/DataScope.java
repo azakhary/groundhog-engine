@@ -52,6 +52,7 @@ public class DataScope {
     }
 
     public void setValue(String string) {
+        if(value.equals(string)) return;
         String packageName = parent + name;
         TriggerManager.get().registerEvent("value", packageName);
         value = string;

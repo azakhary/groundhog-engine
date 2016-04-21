@@ -1,23 +1,22 @@
-package com.underwater.groundhog.engine.systems;
+package com.underwater.groundhog.engine.components;
 
+import com.badlogic.ashley.core.Component;
+import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
 
 import java.util.HashMap;
 
 /**
- * Created by avetiszakharyan on 4/20/16.
+ * Created by avetiszakharyan on 4/21/16.
  */
-public class GameSystem extends EntitySystem {
+public class WorldComponent implements Component {
 
     public DataScope worldScope = new DataScope("world");
 
     public HashMap<String, Entity> objects = new HashMap<String, Entity>();
 
-    public GameSystem() {
-
-    }
+    public boolean worldStarted = false;
 
     public Entity getObject(String name) {
         return objects.get(name);

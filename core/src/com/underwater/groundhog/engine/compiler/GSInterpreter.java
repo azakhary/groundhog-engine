@@ -2,13 +2,14 @@ package com.underwater.groundhog.engine.compiler;
 
 import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
+import com.badlogic.gdx.math.Vector2;
 import com.underwater.groundhog.engine.TriggerManager;
 import com.underwater.groundhog.engine.compiler.micro.MicroCommand;
 import com.underwater.groundhog.engine.compiler.micro.commands.*;
 import com.underwater.groundhog.engine.compiler.scopes.DataScope;
-import com.underwater.groundhog.engine.components.PersonComponent;
+import com.underwater.groundhog.engine.components.BrainComponent;
 import com.underwater.groundhog.engine.components.ThingComponent;
-import com.underwater.groundhog.engine.systems.GameSystem;
+import com.underwater.groundhog.engine.components.WorldComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,6 +69,9 @@ public class GSInterpreter {
         microMap.put("condition_end", new DummyCommand());
         microMap.put("marker", new MarkerCommand());
         microMap.put("goto", new GotoCommand());
+        microMap.put("init_person", new InitPersonCommand());
+        microMap.put("init_item", new InitItemCommand());
+        microMap.put("item_interact", new ItemInteractCommand());
     }
 
     public void execute() {
@@ -116,7 +120,9 @@ public class GSInterpreter {
     public void executeScript(String script) {
         markerMap.clear();
         initNewScript(script);
-        executeCommand(0);
+        if(currCommands.size() > 0) {
+            executeCommand(0);
+        }
     }
 
 
@@ -129,6 +135,7 @@ public class GSInterpreter {
 
         for(int i = 0; i < lines.length; i++) {
             String[] parts = processLine(lines[i]);
+            if(parts.length == 0) continue;
             String commandName = parts[0];
             String[] args = new String[parts.length-1];
             System.arraycopy(parts, 1, args, 0, parts.length-1);
@@ -189,7 +196,9 @@ public class GSInterpreter {
         stateTimePassed = 0;
         currentState = reader.states.get(stateName);
 
-        executeScript(currentState.mainScript);
+        if(currentState.mainScript != null && !currentState.mainScript.isEmpty()) {
+            executeScript(currentState.mainScript);
+        }
     }
 
     public DataScope processExpression(String expression) {
@@ -198,19 +207,21 @@ public class GSInterpreter {
         }
 
         String[] parts = expression.split("\\.");
-        DataScope scope = entity.getComponent(ThingComponent.class).scope;
+        ThingComponent thing = entity.getComponent(ThingComponent.class);
+        DataScope scope = thing.scope;
+        DataScope worldScope = thing.parentWorld.getComponent(WorldComponent.class).worldScope;
         if(!expression.contains(".")) {
             if(scope.contains(expression)) {
                 return scope.get(expression);
-            } else if(engine.getSystem(GameSystem.class).worldScope.contains(expression)){
-                return engine.getSystem(GameSystem.class).worldScope.get(expression);
+            } else if(worldScope.contains(expression)){
+                return worldScope.get(expression);
             } else {
                 return new DataScope("", expression);
             }
         }
         int index = 0;
         if(parts[0].equals("world")) {
-            scope = engine.getSystem(GameSystem.class).worldScope;
+            scope = worldScope;
             index++;
         }
         for(; index < parts.length; index++) {
@@ -220,9 +231,43 @@ public class GSInterpreter {
         return scope;
     }
 
+    public Vector2 parsePos(String pos) {
+        String posStr = pos;
+        String[] tmp = posStr.split(":");
+        float x = Float.parseFloat(tmp[0]);
+        float y = Float.parseFloat(tmp[1]);
+        return new Vector2(x, y);
+    }
+
+    public Entity getParentWorld() {
+        ThingComponent thing = entity.getComponent(ThingComponent.class);
+        if(thing == null) {
+            // could be a world actor
+            WorldComponent world = entity.getComponent(WorldComponent.class);
+            if(world != null) {
+                return entity;
+            }
+        }
+        Entity world = thing.parentWorld;
+        return world;
+    }
+
+    public WorldComponent getParentWorldComponent() {
+        ThingComponent thing = entity.getComponent(ThingComponent.class);
+        if(thing == null) {
+            // could be a world actor
+            WorldComponent world = entity.getComponent(WorldComponent.class);
+            if(world != null) {
+                return world;
+            }
+        }
+        Entity world = thing.parentWorld;
+        return world.getComponent(WorldComponent.class);
+    }
+
     public void stateTick(GSReader.State state) {
-        PersonComponent person = entity.getComponent(PersonComponent.class);
-        String fullName = person.id + "."+ state.name;
+        BrainComponent brain = entity.getComponent(BrainComponent.class);
+        String fullName = brain.id + "."+ state.name;
         TriggerManager.get().registerEvent("state_tick", fullName);
     }
 

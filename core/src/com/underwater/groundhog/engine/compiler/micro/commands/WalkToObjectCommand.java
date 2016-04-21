@@ -2,7 +2,7 @@ package com.underwater.groundhog.engine.compiler.micro.commands;
 
 import com.badlogic.ashley.core.Entity;
 import com.underwater.groundhog.engine.components.ThingComponent;
-import com.underwater.groundhog.engine.systems.GameSystem;
+import com.underwater.groundhog.engine.components.WorldComponent;
 
 /**
  * Created by avetiszakharyan on 4/21/16.
@@ -15,7 +15,7 @@ public class WalkToObjectCommand extends WalkToPosCommand {
     public void init(String[] args) {
         String expression = args[0];
         String name = interpreter.processExpression(expression).name;
-        targetEntity = interpreter.engine.getSystem(GameSystem.class).getObject(name);
+        targetEntity = interpreter.getParentWorldComponent().getObject(name);
     }
 
     @Override

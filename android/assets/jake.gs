@@ -1,4 +1,5 @@
 [agenda]
+    operation memory.home_position = position
 	change_state do_nothing
 [/agenda]
 [state "turn_lights_on"]
@@ -7,30 +8,39 @@
 			change_state do_nothing
 		condition_end
 		operation memory.last_position = position
-		marker 1
 		walk_to_position world.items.boxA.position
-		operation world.light = on
-		condition_start world.light == off
-			delay 2000
-			operation stats.irritation += 10
-			condition_start stats.irritation > 50
-				goto 2
-			condition_end
-			goto 1
-		condition_end
-		marker 2
-		walk_to_position memory.last_position
-		change_state do_nothing
+		item_interact boxA button_press
+		change_state go_home
 	[/main]
+	[trigger value world.light]
+        condition_start world.light == on
+            delay 1
+            say "Oh.. okay then.."
+            walk_to_position memory.last_position
+            change_state do_nothing
+        condition_end
+    [/trigger]
+[/state]
+[state "go_home"]
+    [main]
+        walk_to_position memory.home_position
+        change_state do_nothing
+    [/main]
+    [trigger value world.light]
+	    condition_start world.light == off
+            say "dude.."
+            delay 1
+            change_state turn_lights_on
+        condition_end
+        condition_start world.light == on
+            walk_to_position memory.home_position
+            change_state do_nothing
+        condition_end
+	[/trigger]
 [/state]
 [state "do_nothing"]
-    [main]
-        marker start
-        delay 10
-        goto start
-    [/main]
     [trigger state_tick jake.do_nothing]
-        condition_start state_time > 3
+        condition_start state_time > 2
             condition_start world.light != on
                 say "I can't stand the dark anymore..."
                 change_state turn_lights_on
