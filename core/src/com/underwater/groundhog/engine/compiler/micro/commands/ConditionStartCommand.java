@@ -1,5 +1,6 @@
 package com.underwater.groundhog.engine.compiler.micro.commands;
 
+import com.badlogic.gdx.utils.NumberUtils;
 import com.underwater.groundhog.engine.compiler.GSInterpreter;
 import com.underwater.groundhog.engine.compiler.micro.MicroCommand;
 
@@ -37,6 +38,12 @@ public class ConditionStartCommand extends MicroCommand {
 
     private boolean compare(String left, String right, String comparator) {
         if(comparator.equals("==")) {
+            if(isNumeric(left) && isNumeric(right)) {
+                float leftVal = Float.parseFloat(left);
+                float rightVal = Float.parseFloat(right);
+                return leftVal == rightVal;
+            }
+
             return left.equals(right);
         } else if(comparator.equals("!=")) {
             return !left.equals(right);
@@ -61,5 +68,18 @@ public class ConditionStartCommand extends MicroCommand {
         }
 
         return false;
+    }
+
+    public static boolean isNumeric(String str)
+    {
+        try
+        {
+            double d = Double.parseDouble(str);
+        }
+        catch(NumberFormatException nfe)
+        {
+            return false;
+        }
+        return true;
     }
 }
