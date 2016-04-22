@@ -1,24 +1,43 @@
 [agenda]
-    change_state do_nothing
+    change_state monolog
 [/agenda]
+[state "monolog"]
+    [main]
+        operation memory.home_pos = position
+        say "okay, gotta be quick"
+        say "need to eat really quick"
+        say "then go to toilet and poop"
+        say "yeah and one other thing"
+        say "come back here!"
+        say "here. we. go!"
+        change_state eat
+    [/main]
+[/state]
+[state "eat"]
+    [main]
+        walk_to_object world.items.table
+        say "om. nom. nom"
+        say "mm. yummy!"
+        say "omnonononomonomnom"
+        delay 2
+        say "done!"
+        change_state poop
+    [/main]
+[/state]
+[state "poop"]
+    [main]
+        walk_to_object world.items.toilet
+        say "farrrrrttttttt"
+        say "ptththththththt"
+        say "oh my!"
+        delay 2
+        say "prrt.... done!"
+        change_state do_nothing
+    [/main]
+[/state]
 [state "do_nothing"]
-	[trigger value world.light]
-	    condition_start world.light == on
-	        delay 1
-	        say ".. [burp]"
-            operation stats.irritation += 20
-            condition_start stats.irritation > 50
-                say "srsly?... [burp]"
-            condition_end
-		condition_end
-		condition_start world.light == off
-            operation stats.irritation -= 10
-            say "Thanks... [burp]"
-        condition_end
-	[/trigger]
-	[trigger event bob_gay_love]
-        delay 1
-        say "Oi! You faggot!"
-        fire_event break_phill_heart
-	[/trigger]
+    [main]
+        walk_to_position memory.home_pos
+        say "well... bye!"
+    [/main]
 [/state]

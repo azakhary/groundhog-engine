@@ -14,6 +14,9 @@ import com.underwater.groundhog.engine.compiler.GSReader;
 import com.underwater.groundhog.engine.compiler.scopes.HumanScope;
 import com.underwater.groundhog.engine.compiler.scopes.ThingScope;
 import com.underwater.groundhog.engine.components.*;
+import org.apache.commons.io.FilenameUtils;
+
+import java.net.URISyntaxException;
 
 /**
  * Created by avetiszakharyan on 4/20/16.
@@ -53,7 +56,8 @@ public class WorldSystem extends IteratingSystem {
         entity.add(thing);
         entity.add(person);
         getEngine().addEntity(entity);
-        setInterpreter(getEngine(), entity, id).execute();
+        GSInterpreter interpreter = setInterpreter(getEngine(), entity, id);
+        if(interpreter != null) interpreter.execute();
     }
 
     public void createItem(Entity worldEntity, String id, Vector2 pos) {
@@ -68,15 +72,21 @@ public class WorldSystem extends IteratingSystem {
         entity.add(thing);
         entity.add(item);
         getEngine().addEntity(entity);
-        setInterpreter(getEngine(), entity, id).execute();
+        GSInterpreter interpreter = setInterpreter(getEngine(), entity, id);
+        if(interpreter != null) interpreter.execute();
     }
 
     public static GSInterpreter setInterpreter(Engine engine, Entity entity, String id) {
+        //FileHandle fileHandle = Gdx.files.internal("/"+getPath() +id+".gs");
         FileHandle fileHandle = Gdx.files.internal(id+".gs");
-        GSReader gsReader = new GSReader(fileHandle);
-        GSInterpreter gsInterpreter = new GSInterpreter(gsReader);
-        gsInterpreter.setEngine(engine);
-        gsInterpreter.setEntity(entity);
+        System.out.println("/"+getPath() +id+".gs");
+        GSInterpreter gsInterpreter = null;
+        if(fileHandle.exists()) {
+            GSReader gsReader = new GSReader(fileHandle);
+            gsInterpreter = new GSInterpreter(gsReader);
+            gsInterpreter.setEngine(engine);
+            gsInterpreter.setEntity(entity);
+        }
 
         BrainComponent brain = entity.getComponent(BrainComponent.class);
         if(brain == null) {
@@ -87,5 +97,16 @@ public class WorldSystem extends IteratingSystem {
         }
 
         return gsInterpreter;
+    }
+
+    public static String getPath() {
+        try {
+            String path =  WorldSystem.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            return FilenameUtils.getPath(path);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 }

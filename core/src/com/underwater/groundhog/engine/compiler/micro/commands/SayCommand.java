@@ -10,8 +10,11 @@ import com.underwater.groundhog.engine.systems.LabelSystem;
  */
 public class SayCommand extends MicroCommand {
 
+    private float delay;
+
     @Override
     public void init(String[] args) {
+        super.init();
         PersonComponent personComponent = interpreter.entity.getComponent(PersonComponent.class);
         ThingComponent thing = interpreter.entity.getComponent(ThingComponent.class);
         String text = "LOG: " + args[0];
@@ -24,6 +27,14 @@ public class SayCommand extends MicroCommand {
             interpreter.engine.getSystem(LabelSystem.class).addLbl(args[0], thing);
         }
 
-        endCommand();
+        delay = text.length() * 0.05f;
+        if(delay < 1.2f) delay = 1.2f;
+    }
+
+    public void tick(float delta) {
+        super.tick(delta);
+        if(time > delay) {
+            endCommand();
+        }
     }
 }

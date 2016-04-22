@@ -99,7 +99,7 @@ public class GSInterpreter {
         }
 
 
-        if(isScriptRunning) {
+        if(isScriptRunning && currCommand != null) {
             currCommand.tick(delta);
         }
     }

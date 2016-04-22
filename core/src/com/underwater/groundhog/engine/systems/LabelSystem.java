@@ -50,7 +50,9 @@ public class LabelSystem extends IteratingSystem {
             pos.set(thingComponent.x, thingComponent.y);
             viewport.project(pos);
             font.setColor(1, 1, 1, labelComponent.time/3f);
-            font.draw(batch, labelComponent.text, pos.x-50, pos.y+40);
+            float offset = 5f*labelComponent.text.length();
+            if(pos.x > offset) pos.x-=offset;
+            font.draw(batch, labelComponent.text, pos.x, pos.y+40+(60f - labelComponent.time*20f));
             font.setColor(1, 1, 1, 1);
         }
         batch.flush();
