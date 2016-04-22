@@ -114,5 +114,26 @@ If your character needs to remember something, you can make up a virtual "memory
 operation memory.some_var = 10
 ```
 
+Here are some other examples:
+
+```
+operation world.people.jake.stats.hp -= 10
+```
+
+```
+condition_start stats.hp < 0
+    say "okay I am dead now..."
+condition_end
+```
 
 
+### External Inputs
+
+Currently there is just one way to interact with world externally, by clicking on items with mouse. When clicked
+an item interaction event button_press will be called, which you can catch with a trigger.
+
+
+### Where to from now on?
+
+Go ahead and experiment with GS, and make some cool interactive stories. The idea is to make a scripting language
+that can allow you to write less, while still keeping characters being able to "react" to any "undescribed" situation.
