@@ -126,6 +126,15 @@ condition_start stats.hp < 0
 condition_end
 ```
 
+### GS Predefined variables
+
+Here is the list of pre-defined constants/variables that exist no matter what you do:
+
+* world - the world scope is always there
+* world.people - contains all the characters.
+* world.items - contains all the items.
+* position - is a always present local to item or character variable containing current position coordiante
+
 
 ### External Inputs
 
